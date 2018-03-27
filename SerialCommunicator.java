@@ -17,13 +17,13 @@ public class SerialCommunicator{
     static  int cnt=0;
             
     public static void main(String[] args) {
-        serialPort = new SerialPort("COM3"); 
+        serialPort = new SerialPort("COM3");                                    //Create new SerialPort object to a particular port
         try {
-            serialPort.openPort();//Open port
-            serialPort.setParams(9600, 8, 1, 0);//Set params
-            int mask = SerialPort.MASK_RXCHAR + SerialPort.MASK_CTS + SerialPort.MASK_DSR;//Prepare mask
-            serialPort.setEventsMask(mask);//Set mask
-            serialPort.addEventListener(new SerialPortReader());//Add SerialPortEventListener
+            serialPort.openPort();                                              //Open port
+            serialPort.setParams(9600, 8, 1, 0);                                //Default params
+            int mask = SerialPort.MASK_RXCHAR + SerialPort.MASK_CTS + SerialPort.MASK_DSR; //Prepare default mask
+            serialPort.setEventsMask(mask);                                     //Set mask
+            serialPort.addEventListener(new SerialPortReader());                //Add SerialPortEventListener
         }
         catch (SerialPortException ex) {
             System.out.println(ex);
@@ -31,23 +31,23 @@ public class SerialCommunicator{
     }
 
 
-    static class SerialPortReader implements SerialPortEventListener {
+    static class SerialPortReader implements SerialPortEventListener {          //Create static nexted class for eventListener
         
         private StringBuilder message = new StringBuilder();
         private Boolean receivingMessage = false;
         
         @Override
         public void serialEvent(SerialPortEvent event) {
-            if(event.isRXCHAR() && event.getEventValue() > 0){
-                try {
-                    byte buffer[] = serialPort.readBytes();
-                    for (byte b: buffer) {
-                        if ( (b == '\r' || b == '\n') && message.length() > 0) {
-                            String toProcess = message.toString();
-                            System.out.println(toProcess);
-                            message.setLength(0);
+            if(event.isRXCHAR() && event.getEventValue() > 0){                  //event.isRXCHAR checks if there is an input available
+                try {                                                           //event.getEventValue checks if the input size > 0
+                    byte buffer[] = serialPort.readBytes();                     //ReadBytes of n length from the serail port
+                    for (byte b: buffer) {                                      //Iterate through all the elements of buffer[].
+                        if ( (b == '\r' || b == '\n') && message.length() > 0) {//If Carriage return (\r) or newline(\n) found
+                            String finalMessage = message.toString();           //Convert StringBuilder to string
+                            System.out.println(finalMessage);                   //Display String
+                            message.setLength(0);                               //Clear StringBuilder
                         }else {
-                            message.append((char)b);
+                            message.append((char)b);                            //Else append the current char in b to StringBuilder
                         }
                     }                
                 }catch (SerialPortException ex) {
